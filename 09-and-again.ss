@@ -495,6 +495,7 @@
            ((mk-length mk-length) x))))))
 
 ; it is called the applicative-order Y combinator.
+; https://eecs.ceas.uc.edu/~franco/C511/html/Scheme/ycomb.html
 ;
 (define Y
   (lambda (le)
