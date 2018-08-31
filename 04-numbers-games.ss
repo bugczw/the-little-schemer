@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 4 of The Little Schemer:
 ; Numbers Games
 ;
@@ -149,6 +149,7 @@
 (tup+ '(3 7) '(4 6 8 1))            ; '(7 13 8 1)
 
 ; The o> function compares n with m and returns true if n>m
+; n and m must be both greater than 0.
 ;
 (define o>
   (lambda (n m)

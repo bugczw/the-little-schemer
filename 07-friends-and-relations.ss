@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 7 of The Little Schemer:
 ; Friends and Relations
 ;
@@ -72,20 +72,20 @@
       (else
         (cons (car lat) (multirember a (cdr lat)))))))
 
-(define makeset
+(define re-makeset
   (lambda (lat)
     (cond
       ((null? lat) '())
       (else
         (cons (car lat)
-              (makeset (multirember (car lat) (cdr lat))))))))
+              (re-makeset (multirember (car lat) (cdr lat))))))))
 
-; Test makeset
+; Test re-makeset
 ;
-(makeset '(apple peach pear peach plum apple lemon peach))
+(re-makeset '(apple peach pear peach plum apple lemon peach))
 ; ==> '(apple peach pear plum lemon)
 
-(makeset '(apple 3 pear 4 9 apple 3 4))
+(re-makeset '(apple 3 pear 4 9 apple 3 4))
 ; ==> '(apple 3 pear 4 9)
 
 ; The subset? function determines if set1 is a subset of set2
@@ -110,20 +110,20 @@
 
 ; A shorter version of subset?
 ;
-(define subset?
+(define re-subset?
   (lambda (set1 set2)
     (cond
       ((null? set1) #t)
       (else (and (member? (car set1) set2)
-                 (subset? (cdr set1) set2))))))
+                 (re-subset? (cdr set1) set2))))))
 
-; Tests of the new subset?
+; Tests of the new re-subset?
 ;
-(subset? '(5 chicken wings)
+(re-subset? '(5 chicken wings)
          '(5 hamburgers 2 pieces fried chicken and light duckling wings))
 ; ==> #t
 
-(subset? '(4 pounds of horseradish)
+(re-subset? '(4 pounds of horseradish)
          '(four pounds of chicken and 5 ounces of horseradish))
 ; ==> #f
 
@@ -140,45 +140,45 @@
 (eqset? '() '())                    ; #t
 (eqset? '(a b c) '(a b))            ; #f
 
-; The intersect? function finds if two sets intersect
+; The intersect-if? function finds if two sets intersect
 ;
-(define intersect?
+(define intersect-if?
   (lambda (set1 set2)
     (cond
       ((null? set1) #f)
       ((member? (car set1) set2) #t)
       (else
-        (intersect? (cdr set1) set2)))))
+        (intersect-if? (cdr set1) set2)))))
 
-; Examples of intersect?
+; Examples of intersect-if?
 ;
-(intersect?
+(intersect-if?
   '(stewed tomatoes and macaroni)
   '(macaroni and cheese))
 ; ==> #t
 
-(intersect?
+(intersect-if?
   '(a b c)
   '(d e f))
 ; ==> #f
 
-; A shorter version of intersect?
+; A shorter version of intersect-if?
 ;
-(define intersect?
+(define re-intersect-if?
   (lambda (set1 set2)
     (cond
       ((null? set1) #f)
       (else (or (member? (car set1) set2)
-                (intersect? (cdr set1) set2))))))
+                (re-intersect-if? (cdr set1) set2))))))
 
-; Tests of intersect?
+; Tests of re-intersect-if?
 ;
-(intersect?
+(re-intersect-if?
   '(stewed tomatoes and macaroni)
   '(macaroni and cheese))
 ; ==> #t
 
-(intersect?
+(re-intersect-if?
   '(a b c)
   '(d e f))
 ; ==> #f
@@ -234,6 +234,7 @@
 (xxx '(a b c) '(a b d e f))     ; '(c)
 
 ; The intersectall function finds intersect between multitude of sets
+; Assume that the list of set is not empty
 ;
 (define intersectall
   (lambda (l-set)
@@ -303,11 +304,15 @@
 '((apples peaches) (pumpkin pie))
 '((4 3) (4 2) (7 6) (6 2) (3 4))
 
+		
 ; The fun? function determines if rel is a function
 ;
 (define fun?
   (lambda (rel)
-    (set? (firsts rel))))
+    (set? (firsts rel))))	
+; Rel is a set of pairs
+; a single pair consists of independent and dependent variables.
+; The function's requirements is that independent variables cannot be the same.
 
 ; It uses firsts function from Chapter 3 (03-cons-the-magnificent.ss)
 (define firsts
@@ -346,15 +351,15 @@
 
 ; Simplified revrel
 ;
-(define revrel
+(define re-revrel
   (lambda (rel)
     (cond
       ((null? rel) '())
-      (else (cons (revpair (car rel)) (revrel (cdr rel)))))))
+      (else (cons (revpair (car rel)) (re-revrel (cdr rel)))))))
 
-; Test of simplified revrel
+; Test of simplified re-revrel
 ; 
-(revrel '((8 a) (pumpkin pie) (got sick)))
+(re-revrel '((8 a) (pumpkin pie) (got sick)))
 ; ==> '((a 8) (pie pumpkin) (sick got))
 
 ; The fullfun? function determines if the given function is full

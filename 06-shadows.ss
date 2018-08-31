@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 6 of The Little Schemer:
 ; Shadows
 ;
@@ -43,20 +43,20 @@
 
 ; Assuming aexp is a numeric expression, numbered? can be simplified
 ;
-(define numbered?
+(define re-numbered?
   (lambda (aexp)
     (cond
       ((atom? aexp) (number? aexp))
       (else
-        (and (numbered? (car aexp))
-             (numbered? (car (cdr (cdr aexp)))))))))
+        (and (re-numbered? (car aexp))
+             (re-numbered? (car (cdr (cdr aexp)))))))))
 
-; Tests of numbered?
+; Tests of re-numbered?
 ;
-(numbered? '5)                               ; #t
-(numbered? '(5 o+ 5))                        ; #t
-(numbered? '(5 ox (3 o^ 2)))                 ; #t
-(numbered? '((5 o+ 2) ox (3 o^ 2)))          ; #t
+(re-numbered? '5)                               ; #t
+(re-numbered? '(5 o+ 5))                        ; #t
+(re-numbered? '(5 ox (3 o^ 2)))                 ; #t
+(re-numbered? '((5 o+ 2) ox (3 o^ 2)))          ; #t
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                                            ;
@@ -159,15 +159,15 @@
 
 ; Redefine helper functions for infix notation
 ;
-(define 1st-sub-exp
+(define re-1st-sub-exp
   (lambda (aexp)
     (car aexp)))
 
-(define 2nd-sub-exp
+(define re-2nd-sub-exp
   (lambda (aexp)
     (car (cdr (cdr aexp)))))
 
-(define operator
+(define re-operator
   (lambda (aexp)
     (car (cdr aexp))))
 

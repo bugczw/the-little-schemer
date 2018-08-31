@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 2 of The Little Schemer:
 ; Do It, Do It Again, and Again, and Again ...
 ;

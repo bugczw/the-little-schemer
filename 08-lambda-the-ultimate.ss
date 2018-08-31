@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 8 of The Little Schemer:
 ; Lambda the Ultimate
 ;
@@ -54,23 +54,23 @@
 ; and returns a function that takes an element and a list
 ; and removes the element from the list
 ;
-(define rember-f
+(define re-rember-f
   (lambda (test?)
     (lambda (a l)
       (cond
         ((null? l) '())
         ((test? (car l) a) (cdr l))
         (else
-          (cons (car l) ((rember-f test?) a (cdr l))))))))
+          (cons (car l) ((re-rember-f test?) a (cdr l))))))))
 
-; Test of rember-f
+; Test of re-rember-f
 ;
-((rember-f eq?) 2 '(1 2 3 4 5))
+((re-rember-f eq?) 2 '(1 2 3 4 5))
 ; ==> '(1 3 4 5)
 
-; Curry (rember-f eq?)
+; Curry (re-rember-f eq?)
 ;
-(define rember-eq? (rember-f eq?))
+(define rember-eq? (re-rember-f eq?))
 
 ; Test curried function
 ;
@@ -105,7 +105,7 @@
 
 ; The insertR function, curried
 ;
-(define insertR-f
+(define re-insertR-f
   (lambda (test?)
     (lambda (new old l)
       (cond
@@ -113,10 +113,10 @@
         ((test? (car l) old)
          (cons old (cons new (cdr l))))
         (else
-          (cons (car l) ((insertR-f test?) new old (cdr l))))))))
+          (cons (car l) ((re-insertR-f test?) new old (cdr l))))))))
 
-; Test insertR-f
-((insertR-f eq?)
+; Test re-insertR-f
+((re-insertR-f eq?)
   'e
   'd
   '(a b c d f g d h))                  ; '(a b c d e f g d h)
@@ -169,14 +169,14 @@
 
 ; insertL can also be defined by passing it a lambda
 ;
-(define insertL
+(define re-insertL
   (insert-g
     (lambda (new old l)
       (cons new (cons old l)))))
 
-; Test insertL
+; Test re-insertL
 ;
-(insertL
+(re-insertL
   'd
   'e
   '(a b c e f g d h))                  ; '(a b c d e f g d h)
@@ -199,6 +199,8 @@
     (cons new l)))
 
 ; subst is now just (insret-g seqS)
+; The subst function substitutes the first occurence of element old with new
+; in the list lat in charpter 3.
 ;
 (define subst (insert-g seqS))
 
@@ -221,6 +223,8 @@
     l))
 
 ; It's rember! Let's test it.
+; The rember function removes the first occurance of the given atom from the
+; given list in charpter 3.
 ;
 (yyy
   'sausage
@@ -273,31 +277,31 @@
 
 ; The value function rewritten to use abstraction
 ;
-(define value
+(define re-value
   (lambda (nexp)
     (cond
       ((atom? nexp) nexp)
       (else
         ((atom-to-function (operator nexp))
-         (value (1st-sub-exp nexp))
-         (value (2nd-sub-exp nexp)))))))
+         (re-value (1st-sub-exp nexp))
+         (re-value (2nd-sub-exp nexp)))))))
 
-; value uses 1st-sub-exp
+; re-value uses 1st-sub-exp
 ;
 (define 1st-sub-exp
   (lambda (aexp)
     (car (cdr aexp))))
 
-; value uses 2nd-sub-exp
+; re-value uses 2nd-sub-exp
 (define 2nd-sub-exp
   (lambda (aexp)
     (car (cdr (cdr aexp)))))
 
-; Test value
+; Test re-value
 ;
-(value 13)                                   ; 13
-(value '(o+ 1 3))                            ; 4
-(value '(o+ 1 (o^ 3 4)))                     ; 82
+(re-value 13)                                   ; 13
+(re-value '(o+ 1 3))                            ; 4
+(re-value '(o+ 1 (o^ 3 4)))                     ; 82
 
 ; The multirember function from Chapter 3 (03-cons-the-magnificent.ss)
 ;
@@ -355,7 +359,7 @@
   '(shrimp salad tuna salad and tuna))
 ; ==> '(shrimp salad salad and)
 
-; The multiremember&co uses a collector
+; The multiremember&co uses a collector 
 ;
 (define multiremember&co
   (lambda (a lat col)
@@ -538,6 +542,15 @@
   '(chips and fish or fish and chips)
   col3)
 ; ==> 2
+
+
+;the way to achieve even?
+;
+(define re-even?
+  (lambda(n)
+    (= (* (/ n 2) 2) n)))
+
+
 
 ; The evens-only* function leaves all even numbers in an sexpression
 ; (removes odd numbers)

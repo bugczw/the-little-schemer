@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 1 of The Little Schemer:
 ; Toys
 ;

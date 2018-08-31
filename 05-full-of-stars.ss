@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 5 of The Little Schemer:
 ; *Oh My Gawd*: It's Full of Stars
 ;
@@ -20,7 +20,7 @@
   (lambda (n) (+ n 1)))
 
 ; The rember* function removes all matching atoms from an s-expression
-;
+;	
 (define rember*
   (lambda (a l)
     (cond
@@ -33,7 +33,8 @@
            (cons (car l) (rember* a (cdr l))))))
       (else
         (cons (rember* a (car l)) (rember* a (cdr l)))))))
-
+		
+		
 ; Examples of rember*
 ;
 (rember*

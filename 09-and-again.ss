@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 8 of The Little Schemer:
 ; ...and Again, and Again, and Again, ...
 ;
@@ -18,6 +18,16 @@
       (else
         (pick (sub1 n) (cdr lat))))))
 
+; It does not recur on a part of lat.
+; It is truly unnatural.
+;
+(define keep-looking
+  (lambda (a sorn lat)
+    (cond
+      ((number? sorn)
+       (keep-looking a (pick sorn lat) lat))
+      (else (eq? sorn a )))))
+		
 ; Functions like looking are called partial functions.
 ;
 (define looking
@@ -29,15 +39,6 @@
 (looking 'caviar '(6 2 4 caviar 5 7 3))         ; #t
 (looking 'caviar '(6 2 grits caviar 5 7 3))     ; #f
 
-; It does not recur on a part of lat.
-; It is truly unnatural.
-;
-(define keep-looking
-  (lambda (a sorn lat)
-    (cond
-      ((number? sorn)
-       (keep-looking a (pick sorn lat) lat))
-      (else (eq? sorn a )))))
 
 ; It is the most partial function.
 ;
@@ -73,6 +74,8 @@
 ;
 (shift '((a b) c))                            ; '(a (b c))
 (shift '((a b) (c d)))                        ; '(a (b (c d)))
+;(cons (cons 'a (cons 'b '())) (cons (cons 'c (cons 'd '())) '()))
+;means '((a b) (c d))) or (quote ((a b) (c d)))
 
 ; The a-pair? function determines if it's a pair
 ;
@@ -123,7 +126,7 @@
 ; Example of weight*
 ;
 (weight* '((a b) c))                          ; 7
-(weight* '(a (b c))                           ; 5
+(weight* '(a (b c)))                           ; 5
 
 ; Let's simplify revrel by using inventing revpair that reverses a pair
 ;
@@ -145,7 +148,7 @@
 ;
 (shuffle '(a (b c)))                          ; '(a (b c))
 (shuffle '(a b))                              ; '(a b)
-(shuffle '((a b) (c d)))                      ; infinite swap pora  Ctrl + c  to break and input q to exit
+;(shuffle '((a b) (c d)))                      ; infinite swap pora  Ctrl + c  to break and input q to exit
 
 ; The one? function is true when n=1
 ;
@@ -162,6 +165,7 @@
           ((even? n) (C (/ n 2)))
           (else
             (C (add1 (* 3 n)))))))))
+; (C 2)
 
 (define A
   (lambda (n m)
@@ -176,8 +180,36 @@
 (A 1 0)                                       ; 2
 (A 1 1)                                       ; 3
 (A 2 2)                                       ; 7
+; A is total function.
+; A(0,m)=m+1;A(1,m)=m+2;A(2,m)=2m+3;....
+
+
+; Supose that there is a function called "will-stop?" that 
+; checks whether some function stops for just the empty list, 
+; the simplest of all arguments.
+; (define will-stop? (lambda(f) ... ))
+; The "will-stop?" function is total always returns #t or #f
+; ,depending on wether the argument stops when applied to ().
+; Then we try such function called "last-try".
+; (define last-try
+;   (lambda(x)
+;      (and (will-stop? last-try)
+;           (eternity x))))
+; In this way (will-stop? last-try) will be wrong.
+; That means that some functions like this can be described
+; precisely but cannot be defined.
+
+
+
+; (define length
+;   (lambda(l)
+;     (cond 
+;        ((null? l) 0)
+;        (else (add1 (length (cdr l)))))))
+
 
 ; length0
+; the length of empty list and nothing else.
 ;
 (lambda (l)
   (cond
@@ -197,6 +229,25 @@
              ((null? l) 0)
              (else
                (add1 (eternity (cdr l))))))
+         (cdr l))))))
+		 
+; length<=2
+;
+(lambda (l)
+  (cond
+    ((null? l) 0)
+    (else
+      (add1
+        ((lambda(l)
+           (cond
+             ((null? l) 0)
+             (else
+               (add1 
+			      ((lambda(l)
+				     (cond
+					    ((null? l) 0)
+						(else (add1 (eternity (cdr l))))))
+				  (cdr l))))))
          (cdr l))))))
 
 ; All these programs contain a function that looks like length.
@@ -225,22 +276,115 @@
         (else (add1 (g (cdr l)))))))
   eternity))
 
-; make length
+; rewrite length<=0
 ;
-(lambda (mk-length)
-  (mk-length eternity))
+((lambda (mk-length)
+   (mk-length eternity))
+  (lambda(mk-length)
+     (lambda(l)
+	    (cond
+		   ((null? l) 0)
+		   (else
+		     (add1 
+			   (mk-length (cdr l))))))))
 
 ; rewrite length<=1
 ((lambda (mk-length)
-   (mk-length mk-length))
+   (mk-length
+      (mk-length eternity)))                                                          
  (lambda (mk-length)
    (lambda (l)
      (cond
        ((null? l) 0)
        (else
          (add1
-           ((mk-length eternity) (cdr l))))))))
+           (mk-length (cdr l))))))))
+		   
+; rewrite length<=2
+((lambda (mk-length)
+   (mk-length 
+      (mk-length
+	     (mk-length eternity))))                                                             
+ (lambda (mk-length)
+   (lambda (l)
+     (cond
+       ((null? l) 0)
+       (else
+         (add1
+           (mk-length (cdr l))))))))
+	
 
+; rewrite length<=0
+; by invoking mk-length on eternity and 
+; the result of this on the cdr
+;
+((lambda (mk-length)
+   (mk-length mk-length))
+  (lambda(mk-length)
+     (lambda(l)
+	    (cond
+		   ((null? l) 0)
+		   (else
+		     (add1 
+			   (mk-length (cdr l))))))))
+
+; rewrite length<=1
+;
+((lambda (mk-length)
+   (mk-length mk-length))
+  (lambda(mk-length)
+     (lambda(l)
+	    (cond
+		   ((null? l) 0)
+		   (else
+		     (add1 
+			   ((mk-length eternity)
+			      (cdr l)))))))) 
+			   
+; test for length<=1
+;
+(((lambda (mk-length)
+   (mk-length mk-length))
+  (lambda(mk-length)
+     (lambda(l)
+	    (cond
+		   ((null? l) 0)
+		   (else
+		     (add1 
+			   ((mk-length eternity)
+			      (cdr l))))))))
+ '(apples))
+; 1			   
+
+; rewrite length
+;
+((lambda (mk-length)
+   (mk-length mk-length))
+  (lambda(mk-length)
+     (lambda(l)
+	    (cond
+		   ((null? l) 0)
+		   (else
+		     (add1 
+			   ((mk-length mk-length)
+			      (cdr l))))))))
+				  
+; The same as length in order to better understand			  
+((lambda (mk-length1)
+   (mk-length1 mk-length1))
+ (lambda (mk-length2)
+      (lambda (l)
+        (cond
+          ((null? l) 0)
+		  (else
+             (add1 
+			   ((mk-length2 mk-length2)
+			      (cdr l))))))))
+; Function "(lambda (mk-length2) ...)" pass in parameter "mk-length1" 
+; as function "(lambda (mk-length1)...)"
+; Function "(lambda (x) ...)" pass in parameter "temp-length" 
+; as function "(lambda (temp-length)...)"
+	
 ; It's (length '(1 2 3 4 5))
 ;
 (((lambda (mk-length)
@@ -257,17 +401,74 @@
 ; 5
 
 
+; simplify length
 ((lambda (mk-length)
    (mk-length mk-length))
  (lambda (mk-length)
-   ((lambda (length)
+    (lambda (l)
+        (cond
+          ((null? l) 0)
+          (else
+            (add1 
+                ((lambda (x)
+                    ((mk-length mk-length) x))
+				(cdr l))))))))
+
+
+
+; simplify length again
+((lambda (mk-length)
+   (mk-length mk-length))
+ (lambda (mk-length)
+   ((lambda (temp-length)
       (lambda (l)
         (cond
           ((null? l) 0)
           (else
-            (add1 (length (cdr l)))))))
+            (add1 (temp-length (cdr l)))))))
     (lambda (x)
       ((mk-length mk-length) x)))))
+	    
+; if we don't use lambda expression, it will expend again and again 
+;
+;((lambda (mk-length)
+;   (mk-length mk-length))
+; (lambda (mk-length)
+;   ((lambda (length)
+;      (lambda (l)
+;        (cond
+;          ((null? l) 0)
+;          (else
+;            (add1 (length (cdr l)))))))
+;   (mk-length mk-length))))
+; 
+; In order to calculate, we should get the true expression.
+; Here is the result of expending 3 times 
+;((lambda(length)
+;    (lambda(l)
+;        (cond
+;            ((null? l) 0)
+;            (else (add1 (length (cdr l)))))))
+;    ((lambda(length)
+;        (lambda(l)
+;            (cond
+;                ((null? l) 0)
+;                (else (add1 (length (cdr l)))))))
+;        ((lambda(mk-length)
+;            ((lambda(length)
+;                (lambda(l)
+;                 	(cond
+;                        ((null? l) 0)
+;                        (else (add1 (length (cdr l)))))))
+;                (mk-length mk-length)))
+;            (lambda(mk-length)
+;                ((lambda(length)
+;                    (lambda (l)
+;                        (cond
+;                            ((null? l) 0)
+;                            (else (add1 (length (cdr l)))))))
+;                    (mk-length mk-length))))))							
+	  
 
 ; move out length function
 ;
@@ -277,12 +478,13 @@
     (lambda (mk-length)
       (le (lambda (x)
             ((mk-length mk-length) x))))))
- (lambda (length)
+ (lambda (temp-length)
    (lambda (l)
      (cond
        ((null? l) 0)
-       (else (add1 (length (cdr l))))))))
+       (else (add1 (temp-length (cdr l))))))))
 
+	   
 ; Y
 ;
 (lambda (le)

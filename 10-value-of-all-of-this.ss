@@ -1,4 +1,4 @@
-;
+#lang scheme
 ; Chapter 10 of The Little Schemer:
 ; What Is the Value of All This?
 ;
@@ -59,6 +59,8 @@
     (car (cdr (cdr l)))))
 
 ; The lookup-in-entry function looks in an entry to find the value by name
+; entry-f will be invoked when name is not found in the first list of entry.
+; entry-f can be use as transfer function and recursion.
 ;
 (define lookup-in-entry
   (lambda (name entry entry-f)
@@ -119,7 +121,7 @@
           name
           (car table)
           (lambda (name)
-            (lookup-in-table
+             (lookup-in-table
               name
               (cdr table)
               table-f)))))))
@@ -133,6 +135,18 @@
   (lambda (n) '()))
 ; ==> 'good
 
+
+(cons 'a
+    (cons 'b
+        (cons 'c
+		    (quote()))))
+'(a b c)
+(quote(a b c))
+; => (a b c)
+
+; There are 6 types:
+; *const   *quote   *identifier
+; *lambda   *cond   *application
 ; Expressions to actions
 ;
 (define expression-to-action
@@ -188,6 +202,10 @@
     ((expression-to-action e) e table)))
 
 ; Now the various actions. Let's start with *const
+; We know what primitives do;non-primitives are defined
+; by their arguments and their function body
+
+; *const
 ;
 (define *const
   (lambda (e table)
@@ -227,6 +245,11 @@
     (build 'non-primitive
            (cons table (cdr e)))))
 
+; example of implement *lambda
+;
+(*lambda '(lambda(x)(cons x y)) '(((y z)((8) 9))))	   
+; => (non-primitive ((((y z) ((8) 9))) (x) (cons x y)))		   
+
 ; Let's add helper functions
 ;
 (define table-of first)
@@ -256,7 +279,7 @@
 (define question-of first)
 (define answer-of second)
 
-; Now we can write the real *cond
+; Now we can 4write the real *cond
 ;
 (define *cond
   (lambda (e table)
@@ -281,7 +304,18 @@
     (applyz
       (meaning (function-of e) table)
       (evlis (arguments-of e) table))))
-
+	  
+	  
+; The test of expression-to-action
+;
+(expression-to-action
+    ((lambda(nothing)
+	    (cond
+		    (nothing (quote somthing))
+			(else (quote nothing))))
+	    #t))	  
+; => #<procedure:*identifier>  
+	  
 (define function-of car)
 (define arguments-of cdr)
 
@@ -355,6 +389,19 @@
                       vals)
                     (table-of closure)))))
 
+; test apply-closure
+;
+(apply-closure
+    '((((u v w) (1 2 3)) ((x y z) (4 5 6)))
+	  (x y) (cons z x)) 
+	'((a b c)(d e f)))
+; '(cons z x)
+; '(((x y) ((a b c) (d e f))) ((u v w)(1 2 3)) ((x y z) (4 5 6)))
+; => (6 a b c)
+
+
+					
+					
 ;
 ; Let's try out our brand new Scheme interpreter!
 ;
